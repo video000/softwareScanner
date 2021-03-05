@@ -4,11 +4,11 @@
 
 环境：python3.6.8 32位 （python后面的版本pyinstaller支持的有缺陷，个别windows版本出错）
 
-## 一、如果需要修改源代码和重新打包，请按以下步骤执行：
+### 一、如果需要修改源代码和重新打包，请按以下步骤执行：
 0. 修改version 文件，修改自己的version信息，不改也行，随便。
 1. pip install gooey
 2. pip install pyinstaller
 3. pyinstaller -w -F --clean --uac-admin -i program_icon.ico --version-file version softScan.py
 
-## 二、如果仅需要运行python文件，需要安装gooey包：
+### 二、如果仅需要运行python文件，需要安装gooey包：
 1. pip install gooey
