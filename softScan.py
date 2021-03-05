@@ -7,6 +7,13 @@ from gooey import Gooey, GooeyParser
 # from gooey.gui.components import modals
 import ctypes,sys,os,codecs,winreg,time
 from colored import stylize, attr, fg 
+
+if sys.stdout.encoding != 'UTF-8':
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
+if sys.stderr.encoding != 'UTF-8':
+    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
+#编码修复
+
 # 白名单免费
 expec_soft_ok = [
     "WPS Office 2016专业版",
@@ -21,7 +28,6 @@ expec_soft_ok = [
 ]
 # 白名单付费
 expec_soft_ques = [
-    "Python",
     "Acrobat pro",
     "Microsoft Visio",
     "Office 2013",
@@ -37,10 +43,11 @@ expec_soft_ques = [
     "Illustrator CS6",
 ]
 #window 默认的一些常用系统软件
-Windows_Default_Apps =[
+Windows_Default_Apps_Starts =[
     'Microsoft Visual',
     'Microsoft .',
-    'Intel(R)',
+    'Intel',
+    '英特尔',
     'Realtek',
     'NVIDIA',
     'Lenovo',
@@ -54,24 +61,14 @@ soft_tips={
 }
 
 
-def coding_fix(func):
-    """
-    编码库修复装饰器
-    """
-    def wrapper(*args, **kwargs):
-        if sys.stdout.encoding != 'UTF-8':
-            sys.stdout = codecs.getwriter('UTF-8')(sys.stdout.buffer,'strict')
-        if sys.stderr.encoding != 'UTF-8':
-            sys.stderr = codecs.getwriter('UTF-8')(sys.stderr.buffer,'strict')
-        f = func(*args, **kwargs)
-        return f
-    return wrapper
+    
 
 def duration(func):
     """
     计时装饰器
     """
     def wrapper(*args, **kwargs):
+        print('2')
         start = time.time()
         f = func(*args, **kwargs)
         print(str("扫描完成， 用时  ") + str(int(time.time()-start)) + "秒！")
@@ -79,8 +76,8 @@ def duration(func):
     return wrapper
 
 
-def is_windows_default_apps(soft):
-    for i in Windows_Default_Apps:
+def is_Windows_Default_Apps_Starts(soft):
+    for i in Windows_Default_Apps_Starts:
         if soft.startswith(i):
             return True
     return False
@@ -108,7 +105,8 @@ def display_and_save():
     with open("软件清单.csv", "w") as f:
         for soft in software_name:
             islegal = is_legal(soft)
-            colored_print(soft+soft_tips[islegal],islegal)
+            colored_print(soft+','+soft_tips[islegal]+'\n',islegal)
+            f.write(soft+','+soft_tips[islegal]+'\n')
     
 def is_admin():
     try:
@@ -142,27 +140,25 @@ def software_scan():
                     each_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,key_path,0,winreg.KEY_ALL_ACCESS,)
                     DisplayName, REG_SZ = winreg.QueryValueEx(each_key, "DisplayName")
                     DisplayName = DisplayName.replace("\n", "")
-                    if not is_windows_default_apps(DisplayName):
+                    if not is_Windows_Default_Apps_Starts(DisplayName):
                         software_name.append(DisplayName)                  
                 except:
                         pass
         except WindowsError:
             pass
 
-
 @Gooey(
-    program_name=u"审计部软件扫描程序",
+    program_name="软件扫描程序",
     disable_progress_bar_animation=True,
     language="chinese",
     clear_before_run=True,
     auto_start=True,
     richtext_controls=True,
     show_success_modal=False,
-    show_restart_button=False,
-    image_dir="./",
+    show_restart_button=True,
 )
-@coding_fix
 def main():
+    # print(sys.stdout)
     parser = GooeyParser(prog="安装软件扫描程序")
     _ = parser.parse_args(sys.argv[1:])
     if is_admin():
@@ -176,10 +172,8 @@ def main():
         colored_print("运行错误，请用管理员模式重新运行!", -1)
 
     
-
-
-
-if __name__ == "__main__":
+if __name__ == "__main__": 
     main()
+    
     
     
